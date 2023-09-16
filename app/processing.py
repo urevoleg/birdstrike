@@ -12,7 +12,7 @@ load_dotenv()
 
 
 def upload_strike_to_db():
-    df = pd.read_csv('strike_reports.csv', parse_dates=['INCIDENT_DATE'])
+    df = pd.read_csv('src/strike_reports.csv', parse_dates=['INCIDENT_DATE'])
     #df['striked_at'] = pd.to_datetime(df['INCIDENT_DATE'].dt.date.astype(str) + ' ' + df['TIME'], errors='coerce')
     #df[['h', 'm']] = df['TIME'].str.split(':', expand=True)
 
@@ -20,7 +20,7 @@ def upload_strike_to_db():
 
 
 def processing_isd() -> pd.DataFrame:
-    df = pd.read_csv('isd-history.csv', sep=',',
+    df = pd.read_csv('src/isd-history.csv', sep=',',
                      dtype={'USAF': str, 'WBAN': str},
                      parse_dates=['BEGIN', 'END']) \
         .dropna(subset=['LAT', 'LON'])
@@ -32,7 +32,7 @@ def processing_isd() -> pd.DataFrame:
 
 
 def create_weather_data_links(meteostation_id_list: [], year: int) -> None:
-    with open('weather_data_links.txt', 'w') as f:
+    with open('src/weather_data_links.txt', 'w') as f:
         BASE_URL = f"https://www.ncei.noaa.gov/data/global-hourly/access/{year}/"
         for mid in meteostation_id_list:
             link = BASE_URL + f"{mid}.csv\n"
@@ -58,14 +58,17 @@ def create_schema_for_weather_data(engine):
 
 
 if __name__ == '__main__':
-    # engine = create_engine(os.getenv('DB_URI_BIRD'))
-    #
+    # engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+    # #
     # df = processing_isd()
     # df.to_sql(name='isd', con=engine, if_exists='replace', schema='raw')
-    year = int(sys.argv[1])
-    generate_link(year=year)
+    #
     # df = upload_strike_to_db()
     # df.to_sql(name='strike_reports', con=engine, if_exists='replace', schema='raw')
+
+    year = int(sys.argv[1])
+    generate_link(year=year)
+
     #print(df[['striked_at', 'INCIDENT_DATE', 'TIME', 'h', 't']].head())
     #print(df['h'].value_counts())
-    # create_schema_for_weather_data(engine=engine)
+    #create_schema_for_weather_data(engine=engine)

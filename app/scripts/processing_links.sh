@@ -8,8 +8,8 @@ while read file; do
   filename="$(echo $file | cut -d '/' -f 8)"
   # echo "Downloading....."
   wget -nv --show-progress -O "$year-$filename" $file
-  python ../load.py $year-$filename
-done < "../weather_data_links.txt"
+  python3 ../load.py $year-$filename
+done < "../src/weather_data_links.txt"
 
 # delete all download files
 rm *.csv *.sql

@@ -10,5 +10,5 @@ sqlalchemy==1.4.47
 
 #web
 flask
-flask-sqlalchemy
+flask-sqlalchemy==3.0.5
 flask-api

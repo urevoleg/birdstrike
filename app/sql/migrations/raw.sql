@@ -1,3 +1,4 @@
+create schema raw;
 -- raw.weather_noaa definition
 
 -- Drop table
@@ -162,3 +163,5 @@ CREATE TABLE raw.service (
  loaded_at timestamp DEFAULT now(),
  filename VARCHAR(100) NOT NULL
 );
+
+create schema ods;

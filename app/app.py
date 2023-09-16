@@ -19,7 +19,7 @@ def index():
     return jsonify({
         'dt': dt.datetime.now(),
         'db': {
-            'status': db.engine.connect().execute("""SELECT now();""").fetchone()._asdict()
+            'status': db.engine.connect().execute("""SELECT EXTRACT(EPOCH from max(loaded_at) - min(loaded_at))/60 as load_duration FROM raw.service""").fetchone()._asdict(),
         }
     }, status.HTTP_200_OK)
 

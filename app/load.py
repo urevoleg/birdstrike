@@ -11,7 +11,7 @@ load_dotenv()
 
 
 def load_from_file_to_db(filepath:str):
-    engine = create_engine(os.getenv('DB_URI_BIRD'))
+    engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
     columns = ['STATION', 'DATE', 'SOURCE', 'LATITUDE', 'LONGITUDE',
                'ELEVATION', 'NAME', 'REPORT_TYPE',

@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: 12345
     shm_size: 1gb
   app:
-    container_name: app
+    container_name: app-birdstrike
     build:
       context: .
       dockerfile: app/Dockerfile
