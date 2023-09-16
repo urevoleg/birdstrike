@@ -16,5 +16,8 @@ services:
     build:
       context: .
       dockerfile: app/Dockerfile
+    restart: always
+    ports:
+      - 8000:5000
     volumes:
       - ./app:/app
