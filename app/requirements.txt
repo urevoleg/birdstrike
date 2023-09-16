@@ -6,4 +6,8 @@ pandas
 
 #db
 psycopg2-binary
-sqlalchemy
+sqlalchemy==1.4.47
+
+#web
+flask
+flask-sqlalchemy
