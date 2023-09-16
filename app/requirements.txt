@@ -1,0 +1,9 @@
+# secrets
+python-dotenv
+
+# data
+pandas
+
+#db
+psycopg2-binary
+sqlalchemy

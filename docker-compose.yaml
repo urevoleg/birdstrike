@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  db:
+    container_name: pg-birdstrike
+    image: postgres:13
+    restart: always
+    ports:
+      - 15432:5432
+    environment:
+      POSTGRES_DB: birdstrike
+      POSTGRES_USER: pgadmin
+      POSTGRES_PASSWORD: 12345
+    shm_size: 1gb
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    volumes:
+      - ./app:/app
