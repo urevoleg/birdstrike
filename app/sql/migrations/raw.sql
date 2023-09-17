@@ -164,4 +164,15 @@ CREATE TABLE raw.service (
  filename VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE raw.airport_meteostation_link (
+	airport_id text NULL,
+	air_lat float8 NULL,
+	air_lon float8 NULL,
+	meteostation_id text NULL,
+	station_lat float8 NULL,
+	station_lon float8 NULL,
+	distance float8 NULL,
+	rn int8 NULL
+);
+
 create schema ods;
