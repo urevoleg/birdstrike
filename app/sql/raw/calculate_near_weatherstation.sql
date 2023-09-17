@@ -1,3 +1,4 @@
+CREATE TABLE raw.airport_meteostation_link as
 WITH airs AS (SELECT DISTINCT "AIRPORT_ID" AS airport_id, "LATITUDE" AS lat, "LONGITUDE" AS lon
 				FROM public.strike_reports sr
 				WHERE "AIRPORT_ID" IS NOT NULL),
