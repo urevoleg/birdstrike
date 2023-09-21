@@ -143,3 +143,10 @@ ps: JOIN таблиц будет быстрее если преобразова�
 инцидента и столбец с округленной датой инцидента.
 
 
+
+# Pipeline
+
+upload_unzip_convert_strike_database.sh ->\
+upload_meteostations_list.sh ->\
+psql -h db -p 5432 -U pgadmin -w -d birdstrike -f sql/migrations/raw.sql ->\
+python3 processing.py -> \

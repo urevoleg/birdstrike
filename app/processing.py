@@ -58,17 +58,19 @@ def create_schema_for_weather_data(engine):
 
 
 if __name__ == '__main__':
-    # engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI_'))
-    # # #
-    # df = processing_isd()
-    # df.to_sql(name='isd', con=engine, if_exists='replace', schema='raw')
-    #
-    # df = upload_strike_to_db()
-    # df.to_sql(name='strike_reports', con=engine, if_exists='replace', schema='raw')
+    mode, year = sys.argv[1:]
 
-    year = int(sys.argv[1])
-    generate_link(year=year)
+    if mode == 'strike_isd':
+        engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+        # #
+        df = processing_isd()
+        df.to_sql(name='isd', con=engine, if_exists='replace', schema='raw')
 
-    #print(df[['striked_at', 'INCIDENT_DATE', 'TIME', 'h', 't']].head())
-    #print(df['h'].value_counts())
-    #create_schema_for_weather_data(engine=engine)
+        df = upload_strike_to_db()
+        df.to_sql(name='strike_reports', con=engine, if_exists='replace', schema='raw')
+
+    elif mode == 'generate_and_load':
+        year = int(year)
+        generate_link(year=year)
+    else:
+        print("Not such operation!")
