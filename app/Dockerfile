@@ -10,7 +10,7 @@ RUN apt install --yes --force-yes mdbtools python3 python3-pip wget unzip lsb-re
 RUN sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN apt update
-RUN apt install libpq-dev postgresql-client-13
+RUN apt install --yes --force-yes libpq-dev postgresql-client-13
 
 RUN echo "db:5432:birdstrike:pgadmin:12345" > ~/.pgpass && chmod 0600 ~/.pgpass
 
