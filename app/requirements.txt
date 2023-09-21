@@ -5,6 +5,9 @@ python-dotenv
 pandas
 requests
 
+# viz
+tqdm
+
 #db
 psycopg2-binary
 sqlalchemy==1.4.47

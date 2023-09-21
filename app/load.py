@@ -6,6 +6,8 @@ from dateutil.parser import parse
 
 import itertools
 
+from tqdm.auto import tqdm
+
 import requests
 
 import pandas as pd
@@ -92,7 +94,9 @@ if __name__ == '__main__':
                 yield row
 
 
-    for chunk_rows in chunker(gen_incident_chunk(), 10):
+    engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+
+    for chunk_rows in tqdm(chunker(gen_incident_chunk(), 1024)):
         output = []
 
         def row_handler(row):
@@ -110,7 +114,7 @@ if __name__ == '__main__':
                 near_row = sorted(response_data, key=lambda x: parse(x['DATE']) - row.raw_incidented_at)[0]
             else:
                 near_row = {}
-            output += [{**row._asdict(), **near_row}]
-        print(output)
-        break
+            output += [{**row._asdict(), 'json_data': near_row}]
+        pd.DataFrame(output).to_sql(name='weather_noaa', con=engine, if_exists='append', schema='raw')
+        # break
 
