@@ -1,3 +1,4 @@
+import json
 import os
 import datetime as dt
 import sys
@@ -114,7 +115,7 @@ if __name__ == '__main__':
                 near_row = sorted(response_data, key=lambda x: parse(x['DATE']) - row.raw_incidented_at)[0]
             else:
                 near_row = {}
-            output += [{**row._asdict(), 'json_data': near_row}]
+            output += [{**row._asdict(), 'json_data': json.dump(near_row, default=str)}]
         pd.DataFrame(output).to_sql(name='weather_noaa', con=engine, if_exists='append', schema='raw')
         # break
 
