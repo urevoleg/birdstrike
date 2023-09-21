@@ -21,5 +21,7 @@ services:
       - db
     ports:
       - 8000:5000
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://pgadmin:12345@db:5432/birdstrike
     volumes:
       - ./app:/app
