@@ -161,7 +161,8 @@ CREATE TABLE raw.isd (
 CREATE TABLE raw.service (
  id SERIAL,
  loaded_at timestamp DEFAULT now(),
- filename VARCHAR(100) NOT NULL
+ src VARCHAR(100) NOT NULL,
+ json_payload TEXT
 );
 
 CREATE TABLE raw.airport_meteostation_link (
