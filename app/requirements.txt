@@ -3,6 +3,7 @@ python-dotenv
 
 # data
 pandas
+requests
 
 #db
 psycopg2-binary

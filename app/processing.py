@@ -31,6 +31,12 @@ def processing_isd() -> pd.DataFrame:
     return df
 
 
+def get_unique_meteostations(engine) -> []:
+    with engine.connect() as con:
+        rows = con.execute("""SELECT DISTINCT meteostation_id FROM raw.airport_meteostation_link""")
+        return [row[0] for row in rows]
+
+
 def create_weather_data_links(meteostation_id_list: [], year: int) -> None:
     with open('src/weather_data_links.txt', 'w') as f:
         BASE_URL = f"https://www.ncei.noaa.gov/data/global-hourly/access/{year}/"
@@ -39,10 +45,10 @@ def create_weather_data_links(meteostation_id_list: [], year: int) -> None:
             f.write(link)
 
 
-def generate_link(year: int = 2018):
-    df = processing_isd()
+def generate_link(engine, year: int = 2018):
+    stations = get_unique_meteostations(engine=engine)
 
-    create_weather_data_links(df['meteostation_id'].unique(), year=year)
+    create_weather_data_links(stations, year=year)
 
 
 def create_schema_for_weather_data(engine):
@@ -58,7 +64,7 @@ def create_schema_for_weather_data(engine):
 
 
 if __name__ == '__main__':
-    mode, year = sys.argv[1:]
+    mode, *year = sys.argv[1:]
 
     if mode == 'strike_isd':
         engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
@@ -70,7 +76,12 @@ if __name__ == '__main__':
         df.to_sql(name='strike_reports', con=engine, if_exists='replace', schema='raw')
 
     elif mode == 'generate_and_load':
-        year = int(year)
-        generate_link(year=year)
+        year = int(year[0])
+        engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+        generate_link(engine=engine, year=year)
+    elif mode == 'stations':
+        engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+        stations = get_unique_meteostations(engine=engine)
+        print(stations)
     else:
         print("Not such operation!")

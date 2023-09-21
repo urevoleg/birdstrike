@@ -2,6 +2,8 @@ import os
 import datetime as dt
 import sys
 
+import requests
+
 import pandas as pd
 
 from sqlalchemy import create_engine, text
@@ -32,3 +34,27 @@ def load_from_file_to_db(filepath:str):
 if __name__ == '__main__':
     filepath = sys.argv[1]
     load_from_file_to_db(filepath=filepath)
+
+    """
+    curl https://www.ncei.noaa.gov/access/services/data/v1\?startDate\=2018-01-02T05:00:00\&endDate\=2018-01-03T00:00:00\&dataset\=global-hourly\&stations\=72327013897\&format\=json
+    """
+
+    """
+    create function, which requests url https://www.ncei.noaa.gov/access/services/data/v1\?startDate\=2018-01-02T05:00:00\&endDate\=2018-01-03T00:00:00\&dataset\=global-hourly\&stations\=72327013897\&format\=json
+    save response to json variable and create dataset from response
+    """
+    # def fetch_data_from_noaa(baseurl: str, params: dict = {})-> pd.DataFrame:
+    #     response = requests.get(url=baseurl, params=params)
+    #     response.raise_for_status()
+    #     return pd.DataFrame(response.json())
+    #
+    #
+    # params = {
+    #     'startDate': '2018-01-02T05:00:00',
+    #     'endDate': '2018-01-03T00:00:00',
+    #     'dataset': 'global-hourly',
+    #     'stations': '72327013897',
+    #     'format': 'json'
+    # }
+    # df = fetch_data_from_noaa(baseurl = "https://www.ncei.noaa.gov/access/services/data/v1", params=params)
+    # print(df.head())
