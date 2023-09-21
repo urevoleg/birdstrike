@@ -22,10 +22,10 @@ def upload_strike_to_db():
 def processing_isd() -> pd.DataFrame:
     df = pd.read_csv('src/isd-history.csv', sep=',',
                      dtype={'USAF': str, 'WBAN': str},
-                     parse_dates=['BEGIN', 'END']) \
+                     parse_dates=['BEGIN', 'END'])\
         .dropna(subset=['LAT', 'LON'])
 
-    started_at = df['BEGIN'] >= dt.datetime(2018, 1, 1)
+    started_at = df['END'] >= dt.datetime(2018, 1, 1)
     df = df.loc[started_at].copy()
     df['meteostation_id'] = df['USAF'] + df['WBAN']
     return df
@@ -58,16 +58,16 @@ def create_schema_for_weather_data(engine):
 
 
 if __name__ == '__main__':
-    # engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+    engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI_'))
     # #
-    # df = processing_isd()
-    # df.to_sql(name='isd', con=engine, if_exists='replace', schema='raw')
+    df = processing_isd()
+    df.to_sql(name='isd', con=engine, if_exists='replace', schema='raw')
     #
     # df = upload_strike_to_db()
     # df.to_sql(name='strike_reports', con=engine, if_exists='replace', schema='raw')
 
-    year = int(sys.argv[1])
-    generate_link(year=year)
+    # year = int(sys.argv[1])
+    # generate_link(year=year)
 
     #print(df[['striked_at', 'INCIDENT_DATE', 'TIME', 'h', 't']].head())
     #print(df['h'].value_counts())

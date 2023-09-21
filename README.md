@@ -70,26 +70,61 @@ cross-join + row_number и выбираем там где rn=1. И кладем 
 
 Тут можно глянуть план запроса:
 
-![explain_nearest_meteostation.png](app%2Fimg%2Fexplain_nearest_meteostation.png)
+![explain_nearest_meteo.png](app%2Fimg%2Fexplain_nearest_meteo.png)
 
 Обращает на себя внимание:
-- время выполнения 1сек
-- пишем и читаем на диск (Можно увеличить память сессии ```sql SET work_mem = '128MB';```)
+- Nested Loop и SeqScan - будет долго, посмотрим насколько
+- 
+![timeit_nearest_meteo.png](app%2Fimg%2Ftimeit_nearest_meteo.png)
+
+⏱ Выполнение, около 2-х минут (приемлимо) - точно не часы.
 
 Кстати есть отличный [сервис](https://demo-explain.tensor.ru/plan/) для раскуривания планов запроса. 
 Статьи:
 - [Понимаем планы PostgreSQL-запросов еще удобнее](https://habr.com/ru/companies/tensor/articles/505348/)
 - [Рецепты для хворающих SQL-запросов](https://habr.com/ru/companies/tensor/articles/492694/)
 
-2. JOIN погоды к strike
+2. Data Quality
 
-Аналогично, всё сделает СУБД - это наша сила.
+![data_quality.png](app%2Fimg%2Fdata_quality.png)
+
+Качество можно проверять долго и нудно, будем исходить из последующего объединения данных по времени. 
+
+Нам необходимо, чтобы дата и время были в нужном формате:
+- дата `INCIDENT_DATE` - `%Y-%m-%d`
+- время `TIME` - `%HH:%MM`
+
+Для SQL это может выглядеть не так приятно, как в Python. Например, запрос ниже выведет все строки, где время не совпадает с указанным pattern:
+
+```sql
+SELECT "INDEX_NR",
+	   "INCIDENT_DATE",
+	   "TIME"
+FROM raw.strike_reports sr 
+WHERE "TIME" NOT SIMILAR TO '%((0|1)(0|1|2|3|4|5|6|7|8|9):(0|1|2|3|4|5)(0|1|2|3|4|5|6|7|8|9))|2(0|1|2|3):(0|1|2|3|4|5)(0|1|2|3|4|5|6|7|8|9)%';
+```
+
+Результат:
+
+![dq_time_strike_report_1.png](app%2Fimg%2Fdq_time_strike_report_1.png)
+
+![dq_time_strike_report_2.png](app%2Fimg%2Fdq_time_strike_report_2.png)
+
+475 некорректных записи со временем - они не должны пройти в следующий layer, но и ничего не делать с ними нельзя.
+Их можно складывать в отдельную таблицу - чтобы понимать, какое качество данных мы передаем дальше.
+
+3. Добавляем погоду к strike
 
 ![postgres-muscle.png](app%2Fimg%2Fpostgres-muscle.png)
 
-SQL query - [join_strike_weather.sql](app%2Fsql%2Fods%2Fjoin_strike_weather.sql)
 
+СУБД - это наша сила. Данные уже у нас в базе, можно использовать любой удобный способ объединения данных. 
+Точно следует попробовать сделать это средствами СУБД, для этого потребуется сформировать полную дату инцидента для `strike_report` - это можно делать 
+в момент переноса из `raw -> stg`
 
+Создать нужное поле `incidented_at` можно при помощи трехэтажного выражения =)
 
-
+```sql
+to_timestamp(concat("INCIDENT_DATE"::date::TEXT, ' ', "TIME"), 'YYYY-MM-DD HH24:MI') AT TIME ZONE 'UTC'
+```
 
