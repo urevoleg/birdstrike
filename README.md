@@ -55,9 +55,6 @@ mdb-export -I postgres Public.accdb STRIKE_REPORTS > strike_reports.sql
 Из ссылки извлекается год и название файла, wget выкачивает файл, python load.py загружает в бд и записывает в сервисную таблицу инфо, что данные для такого-то файла 
 загружены.
 
-ps: итого обработано 594 файла, объем загруженных данных в бд указан на скрине ниже
-
-![raw_table_sizes.png](app%2Fimg%2Fraw_table_sizes.png)
 
 ## T-transform
 
@@ -74,7 +71,7 @@ cross-join + row_number и выбираем там где rn=1. И кладем 
 
 Обращает на себя внимание:
 - Nested Loop и SeqScan - будет долго, посмотрим насколько
-- 
+
 ![timeit_nearest_meteo.png](app%2Fimg%2Ftimeit_nearest_meteo.png)
 
 ⏱ Выполнение, около 2-х минут (приемлимо) - точно не часы.
@@ -83,6 +80,7 @@ cross-join + row_number и выбираем там где rn=1. И кладем 
 Статьи:
 - [Понимаем планы PostgreSQL-запросов еще удобнее](https://habr.com/ru/companies/tensor/articles/505348/)
 - [Рецепты для хворающих SQL-запросов](https://habr.com/ru/companies/tensor/articles/492694/)
+
 
 ### Data Quality
 
@@ -143,4 +141,5 @@ date_trunc('hour', to_timestamp(concat("INCIDENT_DATE"::date::TEXT, ' ', "TIME")
 ps: JOIN таблиц будет быстрее если преобразования столбцов по которым идет JOIN выполнять не во время JOIN, а выполнить до:
 то есть при загрузке таблицы столкновений в stg-layer делать очистку данных по корректному времени, формировать столбец с полной датой 
 инцидента и столбец с округленной датой инцидента.
+
 
