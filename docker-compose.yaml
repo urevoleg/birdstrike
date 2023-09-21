@@ -17,6 +17,8 @@ services:
       context: .
       dockerfile: app/Dockerfile
     restart: always
+    depends_on:
+      - db
     ports:
       - 8000:5000
     volumes:
