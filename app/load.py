@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
-    for chunk_rows in tqdm(chunker(gen_incident_chunk(), 1024)):
+    for chunk_rows in tqdm(chunker(gen_incident_chunk(), 64)):
         output = []
 
         def row_handler(row):
