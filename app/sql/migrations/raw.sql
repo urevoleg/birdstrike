@@ -6,23 +6,15 @@ create schema raw;
 -- DROP TABLE raw.weather_noaa;
 
 CREATE TABLE raw.weather_noaa (
-	"STATION" text NULL,
-	"DATE" timestamp NULL,
-	"SOURCE" text NULL,
-	"LATITUDE" float8 NULL,
-	"LONGITUDE" float8 NULL,
-	"ELEVATION" float8 NULL,
-	"NAME" text NULL,
-	"REPORT_TYPE" text NULL,
-	"CALL_SIGN" text NULL,
-	"QUALITY_CONTROL" text NULL,
-	"WND" text NULL,
-	"CIG" text NULL,
-	"VIS" text NULL,
-	"TMP" text NULL,
-	"DEW" text NULL,
-	"SLP" text NULL
+	"index" int8 NULL,
+	"INDEX_NR" int8 NULL,
+	meteostation_id text NULL,
+	raw_incidented_at timestamp NULL,
+	started_at timestamp NULL,
+	ended_at timestamp NULL,
+	json_data text NULL
 );
+CREATE INDEX ix_raw_weather_noaa_index ON raw.weather_noaa USING btree (index);
 
 -- raw.strike_reports definition
 

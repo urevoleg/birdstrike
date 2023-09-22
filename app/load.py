@@ -87,10 +87,13 @@ if __name__ == '__main__':
         engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
         with engine.connect() as con:
+            stmt = """SELECT max(raw_incidented_at) FROM raw.weather_noaa;"""
+            dated_at = con.execute(stmt).fetchone()[0]
+
             with open('sql/raw/meteostation_with_incidented_at.sql', 'r') as f:
                 stmt = text(f.read())
             rows = con.execute(stmt,
-                               dated_at=dt.datetime(2018, 1, 1, 0, 0, 0),)
+                               dated_at=dated_at,)
             for row in rows:
                 yield row
 
