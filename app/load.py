@@ -112,7 +112,6 @@ if __name__ == '__main__':
             return payload
 
         for row in chunk_rows:
-            #TODO надо обработать ошибки от API
             response_data = fetch_data_from_noaa(**row_handler(row))
             if not response_data == []:
                 near_row = sorted(response_data, key=lambda x: parse(x['DATE']) - row.raw_incidented_at)[0]

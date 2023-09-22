@@ -143,18 +143,6 @@ ps: JOIN таблиц будет быстрее если преобразова�
 инцидента и столбец с округленной датой инцидента.
 
 
-
-# Pipeline
-
-```
-upload_unzip_convert_strike_database.sh ->\
-upload_meteostations_list.sh ->\
-psql -h db -p 5432 -U pgadmin -w -d birdstrike -f sql/migrations/raw.sql ->\
-python3 processing.py strike_isd -> \
-# для каждого года
-python3 processing.py generate_and_load 2018 && processing_links.sh 
-```
-
 # TODO
 
 Стоит отметить:
@@ -169,8 +157,78 @@ python3 processing.py generate_and_load 2018 && processing_links.sh
 
 За 2018 год инцидентов - 16202, записей погоды для всех метеостанций 32092318 - меньше 0.05% - однозначно нужно пользовать API ✅
 
-- использование API: запрашивать погоду для каждой пары инцидент-метеостация в диапазоне +-1час.
+- использование API: запрашивать погоду для каждой пары инцидент-метеостация в диапазоне +-30мин.
 Вызовов API будет около 70000 (с 2018 года по нв инцидентов 70919)
 - можно объединить инциденты и метеостанции, сгруппировать по метеостанции и посчитать мин\макс дату инцидента, соответственно за этот период и
 нужно загрузить данные. Для части станций (около 500 данные нужны всего лишь за год)
+
+# API
+
+Добавил работу с API:
+
+Генератор, реализованный [meteostation_with_incidented_at.sql](app%2Fsql%2Fraw%2Fmeteostation_with_incidented_at.sql) выдаёт пары инцидент и метеостанция,
+период времени формируется в диапазоне +-30мин от инцидента на SQL:
+
+```python
+    def gen_incident_chunk():
+        engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+
+        with engine.connect() as con:
+            stmt = """SELECT max(raw_incidented_at) FROM raw.weather_noaa;"""
+            dated_at = con.execute(stmt).fetchone()[0]
+
+            with open('sql/raw/meteostation_with_incidented_at.sql', 'r') as f:
+                stmt = text(f.read())
+            rows = con.execute(stmt,
+                               dated_at=dated_at,)
+            for row in rows:
+                yield row
+```
+
+Далее идет подготовка запроса к API и его выполнение, тк API периодически выдают ошибки, настроены несколько попыток обращения (3):
+```python
+def retries(func):
+    def wrapper(*args, **kwargs):
+        for i in range(3):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                pass
+        return {}
+    return wrapper
+```
+
+Ответы от API сортируются по близости к дате события, выбирается ближайщее:
+
+```python
+near_row = sorted(response_data, key=lambda x: parse(x['DATE']) - row.raw_incidented_at)[0]
+```
+
+Также, работа с API организована как batch processing (формируются chunk, для каждого chunk собираются ответы от API и весь batch
+кладется в БД).
+
+### TODO
+
+Вот этот кусочек:
+```python
+        for row in chunk_rows:
+            response_data = fetch_data_from_noaa(**row_handler(row))
+            if not response_data == []:
+                near_row = sorted(response_data, key=lambda x: parse(x['DATE']) - row.raw_incidented_at)[0]
+            else:
+                near_row = {}
+            output += [{**row._asdict(), 'json_data': json.dumps(near_row, default=str)}]
+```
+
+Можно и нужно завернуть в ThreadPoolExecutor - чтобы хоть какая-то параллельность была =)
+
+# Pipeline
+
+```
+upload_unzip_convert_strike_database.sh ->\
+upload_meteostations_list.sh ->\
+psql -h db -p 5432 -U pgadmin -w -d birdstrike -f sql/migrations/raw.sql ->\
+python3 processing.py strike_isd -> \
+python3 load.py
+```
 
