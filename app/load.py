@@ -122,5 +122,5 @@ if __name__ == '__main__':
     engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
     with Pool(processes=2) as pool:
-        res = pool.map(chunk_handler, chunker(gen_incident_chunk(), 64))
+        res = pool.map(chunk_handler, tqdm(chunker(gen_incident_chunk(), 64)))
 
