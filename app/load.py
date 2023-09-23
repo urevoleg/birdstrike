@@ -7,8 +7,6 @@ from dateutil.parser import parse
 
 import itertools
 
-from tqdm.auto import tqdm
-
 import requests
 
 import pandas as pd
@@ -80,6 +78,7 @@ if __name__ == '__main__':
     # filepath = sys.argv[1]
     # load_from_file_to_db(filepath=filepath)
     from multiprocessing import Pool
+    from concurrent.futures import ThreadPoolExecutor
 
     """
     curl https://www.ncei.noaa.gov/access/services/data/v1\?startDate\=2018-01-02T05:00:00\&endDate\=2018-01-03T00:00:00\&dataset\=global-hourly\&stations\=72327013897\&format\=json
@@ -117,10 +116,12 @@ if __name__ == '__main__':
                 near_row = {}
             output += [{**row._asdict(), 'json_data': json.dumps(near_row, default=str)}]
         pd.DataFrame(output).to_sql(name='weather_noaa', con=engine, if_exists='append', schema='raw')
+        print(dt.datetime.now(), "Chunk processed")
 
 
     engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
-    with Pool(processes=2) as pool:
+    with ThreadPoolExecutor(16) as pool:
         res = pool.map(chunk_handler, chunker(gen_incident_chunk(), 64))
+
 
