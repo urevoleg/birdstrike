@@ -222,6 +222,22 @@ near_row = sorted(response_data, key=lambda x: parse(x['DATE']) - row.raw_incide
 
 Можно и нужно завернуть в ThreadPoolExecutor - чтобы хоть какая-то параллельность была =)
 
+**UPD**
+
+Совсем другие результаты, начало:
+
+![start_api_request.png](app%2Fimg%2Fstart_api_request.png)
+
+Окончание сбора погодных данных:
+
+![ended_api_request.png](app%2Fimg%2Fended_api_request.png)
+
+--------------------------------
+
+![meme_duration_api_request.png](app%2Fimg%2Fmeme_duration_api_request.png)
+
+ps: это для ~50000 инцидентов
+
 # Pipeline
 
 ```
