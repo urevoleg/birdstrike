@@ -79,6 +79,7 @@ def chunker(iterable, size):
 if __name__ == '__main__':
     # filepath = sys.argv[1]
     # load_from_file_to_db(filepath=filepath)
+    from multiprocessing import Pool
 
     """
     curl https://www.ncei.noaa.gov/access/services/data/v1\?startDate\=2018-01-02T05:00:00\&endDate\=2018-01-03T00:00:00\&dataset\=global-hourly\&stations\=72327013897\&format\=json
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
 
         with engine.connect() as con:
-            stmt = """SELECT max(raw_incidented_at) FROM raw.weather_noaa;"""
+            stmt = """SELECT CASE WHEN max(raw_incidented_at) IS NULL THEN '2018-01-01'::timestamp ELSE max(raw_incidented_at) END FROM raw.weather_noaa;"""
             dated_at = con.execute(stmt).fetchone()[0]
 
             with open('sql/raw/meteostation_with_incidented_at.sql', 'r') as f:
@@ -97,10 +98,7 @@ if __name__ == '__main__':
             for row in rows:
                 yield row
 
-
-    engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
-
-    for chunk_rows in tqdm(chunker(gen_incident_chunk(), 64)):
+    def chunk_handler(chunk_rows):
         output = []
 
         def row_handler(row):
@@ -119,5 +117,10 @@ if __name__ == '__main__':
                 near_row = {}
             output += [{**row._asdict(), 'json_data': json.dumps(near_row, default=str)}]
         pd.DataFrame(output).to_sql(name='weather_noaa', con=engine, if_exists='append', schema='raw')
-        # break
+
+
+    engine = create_engine(os.getenv('SQLALCHEMY_DATABASE_URI'))
+
+    with Pool(processes=2) as pool:
+        res = pool.map(chunk_handler, chunker(gen_incident_chunk(), 64))
 
